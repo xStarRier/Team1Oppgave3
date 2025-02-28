@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team 1</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="app">
+    </div>
+
+    <script>
+        // model
+        //   hvor er diskene, 0 = venstre tårn, 1 = midten, 2 = høyre
+        //   alle starter til venstre
+        let small = 30;
+        let medium = 50;
+        let large = 70;
+
+        let leftTower = 0;
+        let centralTower = 1;
+        let rightTower = 2;
+
+        let smallDiskLocation = leftTower;
+        let mediumDiskLocation = leftTower;
+        let largeDiskLocation = leftTower;
+
+        let GameOverMessage = '';
+
+        let isOppgaverShowed = true;
+
+        // let OppgaverText;
+
+        // view 
+        updateView();
+        function updateView() {
+
+            document.getElementById('app').innerHTML = /*HTML*/`
+                <div class="game-container">
+                ${createTowerHtml(leftTower)}
+                ${createTowerHtml(centralTower)}
+                ${createTowerHtml(rightTower)}
+                </div>
+                Flytt liten disk til 
+                ${createButtonHtml('small', leftTower)}
+                ${createButtonHtml('small', centralTower)}
+                ${createButtonHtml('small', rightTower)}
+                <br/>
+                Flytt medium disk til
+                ${createButtonHtml('medium', leftTower)}
+                ${createButtonHtml('medium', centralTower)}
+                ${createButtonHtml('medium', rightTower)}
+                <br/>
+                Flytt stor disk til
+                ${createButtonHtml('large', leftTower)}
+                ${createButtonHtml('large', centralTower)}
+                ${createButtonHtml('large', rightTower)}
+                <br/>
+                <button onclick="restartGame()">New Game</button>
+                <div>${GameOverMessage ?? ''}</div>
+                <button onclick="showText()">Oppgaver</button>
+                <div id="oppgaver"></div>
+            `;
+        }
+
+        // controller
+        function restartGame() {
+            smallDiskLocation = leftTower;
+            mediumDiskLocation = leftTower;
+            largeDiskLocation = leftTower;
+            GameOverMessage = '';
+            updateView();
+        }
+
+        function checkIsFinished() {
+            if (smallDiskLocation == rightTower &&
+                mediumDiskLocation == rightTower &&
+                largeDiskLocation == rightTower) {
+                GameOverMessage = "Congratulations with your great victory!";
+            }
+        }
+
+        function moveDisk(diskType, destinationTower) {
+            if (diskType == 'small') {
+                smallDiskLocation = destinationTower;
+            }
+
+            else if (diskType == 'medium') {
+                mediumDiskLocation = destinationTower;
+
+            }
+            else if (diskType == 'large') {
+                largeDiskLocation = destinationTower;
+
+            }
+            checkIsFinished();
+            updateView();
+        }
+
+        function createDiskHtml(diskSize, color) {
+            return `<div class="disk" style="background-color: ${color}; width: ${diskSize}px"></div>`
+        }
+
+        function createTowerHtml(towerLocation) {
+            let towerHtml = `<div class="tower-container"><div class="tower">`;
+
+            if (largeDiskLocation == towerLocation)
+                towerHtml += createDiskHtml(large, "blue");
+
+            if (mediumDiskLocation == towerLocation)
+                towerHtml += createDiskHtml(medium, "yellow");
+
+            if (smallDiskLocation == towerLocation)
+                towerHtml += createDiskHtml(small, "hotpink");
+
+            towerHtml += `</div></div>`
+
+            return towerHtml;
+        }
+
+        function createButtonHtml(diskType, destinationTower) {
+
+            let disabled = '';
+
+            if (!canMove(diskType, destinationTower)) {
+                disabled = 'disabled';
+            }
+
+            return `<button onclick="moveDisk('${diskType}',${destinationTower})" ${disabled}>
+                    ${returnTowerLocationInNorwegian(destinationTower)} tårn
+                    </button>`
+        }
+
+        function returnTowerLocationInNorwegian(towerIndex) {
+            if (towerIndex == 0) {
+                return 'venstre';
+            }
+            else if (towerIndex == 1) {
+                return 'midtre';
+            }
+            else if (towerIndex == 2) {
+                return 'høyre';
+            }
+        }
+
+        function canMove(diskType, destinationTower) {
+            if (diskType == 'small') {
+                if (smallDiskLocation != destinationTower) {
+                    return true;
+                }
+            }
+            if (diskType == 'medium') {
+                if (mediumDiskLocation != destinationTower &&
+                    mediumDiskLocation != smallDiskLocation &&
+                    smallDiskLocation != destinationTower) {
+                    return true;
+                }
+            }
+            if (diskType == 'large') {
+                if (largeDiskLocation != destinationTower &&
+                    largeDiskLocation != mediumDiskLocation &&
+                    largeDiskLocation != smallDiskLocation &&
+                    smallDiskLocation != destinationTower &&
+                    mediumDiskLocation != destinationTower) {
+                    return true;
+                }
+            }
+
+            else return false;
+
+        }
+
+        function showOrHideOppgaver() {
+           
+            isOppgaverShowed = !isOppgaverShowed;
+            
+            
+        }
+
+
+
+        function showText() {
+            
+            showOrHideOppgaver();
+            
+            if (isOppgaverShowed) {
+                document.getElementById('oppgaver').innerHTML = /*HTML*/`
+            <h4>Oppgaver</h4>
+            Disse oppgavene er ment å løses med kun funks
+            joner, variabler, operatorer, if-setninger og MVC. Man trenger
+            ikke bruke løkker eller lister.
+            <ol>
+                <li>
+                    Studer spillet her: <a href="https://www.mathsisfun.com/games/towerofhanoi.html">mathsisfun.com/games/towerofhanoi.html</a>
+                    og sørg for at dere forstår reglene. 
+                </li>
+                <li>
+                    Sørg for at <tt>updateView()</tt> tegner opp diskene ut fra innholdet av variablene i modellen.
+                    Merk at pga <tt>display: flex</tt> og <tt>flex-direction: column-reverse</tt> må dere legge til 
+                    diskene i motsatt rekkefølge av ellers. Den siste taggen inne i hvert tårn kommer øverst
+                </li>
+                <li>
+                    Implementer aller enkleste versjon av controller-funksjonene, nemlig å flytte hver disk uten å sjekke om det er lov
+                    eller ikke. Sjekk at det virker før dere går videre. 
+                </li>
+                <li>
+                    Implementer så reglene. Du kan ikke flytte en disk til et tårn om det alt ligger en disk der som er mindre.                
+                </li>
+                <li>
+                    Skjul alltid knappene som flytter en disk dit den allerede er. Skjul også knappene som er ulovlige å utføre.
+                </li>
+                <li>
+                    Vis en melding på skjermen hvis spillet er løst, det vil si at alle diskene er på høyre tårn. Vis i det
+                    tilfellet en knapp for å starte spillet på nytt. 
+                </li>
+            </ol>
+             `;
+            }
+            else {
+                document.getElementById('oppgaver').innerHTML = '';
+            }
+          
+        }
+
+        // document.body.innerHTML += isOppgaverShowed ? OppgaverText : '';
+    </script>
+</body>
+
+</html>
